@@ -1,0 +1,6 @@
+.DS_Store
+.idea/
+
+fish/
+    .DS_Store
+    *.o
