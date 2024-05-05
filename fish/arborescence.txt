@@ -1,0 +1,14 @@
+fish/
+│
+├── fish.c
+├── cmdline.c
+├── cmdline.h
+├── cmdline_test.c
+├── Makefile
+│
+└── extern_cmd/
+    └── extern_cmd.c
+    └── extern_cmd.h
+└── intern_cmd/
+    └── intern_cmd.c
+    └── intern_cmd.h

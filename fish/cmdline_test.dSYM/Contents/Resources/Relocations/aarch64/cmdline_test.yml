@@ -1,0 +1,17 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     './fish/cmdline_test'
+relocations:
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _line_init, symObjAddr: 0x0, symBinAddr: 0x10000216C, symSize: 0x74 }
+  - { offsetInCU: 0x46, offset: 0x46, size: 0x8, addend: 0x0, symName: _line_init, symObjAddr: 0x0, symBinAddr: 0x10000216C, symSize: 0x74 }
+  - { offsetInCU: 0x6A, offset: 0x6A, size: 0x8, addend: 0x0, symName: _line_parse, symObjAddr: 0x74, symBinAddr: 0x1000021E0, symSize: 0x858 }
+  - { offsetInCU: 0x148, offset: 0x148, size: 0x8, addend: 0x0, symName: _line_next_word, symObjAddr: 0x8CC, symBinAddr: 0x100002A38, symSize: 0x41C }
+  - { offsetInCU: 0x1B6, offset: 0x1B6, size: 0x8, addend: 0x0, symName: _parse_error, symObjAddr: 0xCE8, symBinAddr: 0x100002E54, symSize: 0x58 }
+  - { offsetInCU: 0x1E9, offset: 0x1E9, size: 0x8, addend: 0x0, symName: _valid_cmdarg_filename, symObjAddr: 0xD40, symBinAddr: 0x100002EAC, symSize: 0xC4 }
+  - { offsetInCU: 0x265, offset: 0x265, size: 0x8, addend: 0x0, symName: _line_reset, symObjAddr: 0xE04, symBinAddr: 0x100002F70, symSize: 0x198 }
+  - { offsetInCU: 0x26, offset: 0x3C8, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x100003108, symSize: 0x4D8 }
+  - { offsetInCU: 0x41, offset: 0x3E3, size: 0x8, addend: 0x0, symName: _try, symObjAddr: 0x4D8, symBinAddr: 0x1000035E0, symSize: 0x150 }
+  - { offsetInCU: 0x62, offset: 0x404, size: 0x8, addend: 0x0, symName: _try.n, symObjAddr: 0x1A30, symBinAddr: 0x100008000, symSize: 0x0 }
+  - { offsetInCU: 0x77, offset: 0x419, size: 0x8, addend: 0x0, symName: _try.li, symObjAddr: 0x1A38, symBinAddr: 0x100008008, symSize: 0x0 }
+  - { offsetInCU: 0x160, offset: 0x502, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x100003108, symSize: 0x4D8 }
+...

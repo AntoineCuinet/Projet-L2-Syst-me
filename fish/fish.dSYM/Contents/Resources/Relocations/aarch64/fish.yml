@@ -1,0 +1,14 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     './fish/fish'
+relocations:
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _line_init, symObjAddr: 0x0, symBinAddr: 0x100002760, symSize: 0x74 }
+  - { offsetInCU: 0x46, offset: 0x46, size: 0x8, addend: 0x0, symName: _line_init, symObjAddr: 0x0, symBinAddr: 0x100002760, symSize: 0x74 }
+  - { offsetInCU: 0x6A, offset: 0x6A, size: 0x8, addend: 0x0, symName: _line_parse, symObjAddr: 0x74, symBinAddr: 0x1000027D4, symSize: 0x858 }
+  - { offsetInCU: 0x148, offset: 0x148, size: 0x8, addend: 0x0, symName: _line_next_word, symObjAddr: 0x8CC, symBinAddr: 0x10000302C, symSize: 0x41C }
+  - { offsetInCU: 0x1B6, offset: 0x1B6, size: 0x8, addend: 0x0, symName: _parse_error, symObjAddr: 0xCE8, symBinAddr: 0x100003448, symSize: 0x58 }
+  - { offsetInCU: 0x1E9, offset: 0x1E9, size: 0x8, addend: 0x0, symName: _valid_cmdarg_filename, symObjAddr: 0xD40, symBinAddr: 0x1000034A0, symSize: 0xC4 }
+  - { offsetInCU: 0x265, offset: 0x265, size: 0x8, addend: 0x0, symName: _line_reset, symObjAddr: 0xE04, symBinAddr: 0x100003564, symSize: 0x198 }
+  - { offsetInCU: 0x26, offset: 0x3C8, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x1000036FC, symSize: 0x36C }
+  - { offsetInCU: 0x41, offset: 0x3E3, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x1000036FC, symSize: 0x36C }
+...
