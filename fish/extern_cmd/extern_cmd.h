@@ -13,6 +13,6 @@
  *             The last element of the array must be NULL to indicate the end of arguments.
  * @return 0 if the command executed successfully, 1 on error.
  */
-int execute_command_extern(char *cmd, char **args);
+int execute_command_extern(char *cmd, char **args, pid_t pid);
 
 #endif /* EXECUTE_COMMAND_EXTERN_H */

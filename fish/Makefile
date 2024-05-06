@@ -7,7 +7,7 @@ LDLIBS = -lcmdline
 
 all: libcmdline.so fish cmdline_test
 
-libcmdline.so: cmdline.o extern_cmd/extern_cmd.o intern_cmd/intern_cmd.o
+libcmdline.so: cmdline.o extern_cmd/extern_cmd.o intern_cmd/intern_cmd.o redirect_cmd/redirect_cmd.o
 	$(CC) $(LDFLAGS) -shared -o $@ $^
 
 fish: fish.o libcmdline.so
@@ -23,6 +23,9 @@ extern_cmd/extern_cmd.o: extern_cmd/extern_cmd.c extern_cmd/extern_cmd.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 intern_cmd/intern_cmd.o: intern_cmd/intern_cmd.c intern_cmd/intern_cmd.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+redirect_cmd/redirect_cmd.o: redirect_cmd/redirect_cmd.c redirect_cmd/redirect_cmd.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:

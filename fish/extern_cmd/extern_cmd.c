@@ -5,8 +5,8 @@
 #include <string.h>
 #include <errno.h>
 
-int execute_command_extern(char *cmd, char **args) {
-    pid_t pid = fork();
+int execute_command_extern(char *cmd, char **args, pid_t pid) {
+    pid = fork();
     if (pid == -1) {
         perror("fork");
         return 1;

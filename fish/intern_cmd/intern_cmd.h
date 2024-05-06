@@ -5,4 +5,4 @@
 int execute_command_intern_cd(char **args);
 int execute_command_intern_exit();
 
-#endif /* EXECUTE_COMMAND_EXTERN_H */
+#endif /* EXECUTE_COMMAND_INTERN_H */
