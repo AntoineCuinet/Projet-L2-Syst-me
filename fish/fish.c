@@ -26,52 +26,44 @@
 #include <libgen.h>
 #include <signal.h>
 
-volatile pid_t pid;
-
 #include "cmdline.h"
+#include "util.h"
 #include "extern_cmd/extern_cmd.h"
 #include "intern_cmd/intern_cmd.h"
 #include "redirect_cmd/redirect_cmd.h"
+#include "background_cmd/background_cmd.h"
 
 #define BUFLEN 512
 
 #define YES_NO(i) ((i) ? "Y" : "N")
 
-
+volatile pid_t pid = -1;
 
 
 void signal_handler(int signal) {
-  if (signal == SIGINT) {
+  if (signal == SIGINT && pid != -1) {
     // TODO: Mettre ici le code pour terminer les commandes lancées en avant-plan
-    kill(pid, SIGINT);
-  }
+    kill(pid, SIGTERM);
+    // buf[0] = '\n';
+    // buf[1] = '0';
+  } 
+  //else {
+    // ignorer le signal
+    //signal(signal, SIG_IGN);
+  //}
+
+  if (signal == SIGCHLD) {
+        // Nettoyer les processus zombies
+        int status;
+        while (waitpid(-1, &status, WNOHANG) > 0) {
+            if (WIFEXITED(status)) {
+                printf("Child process exited with status: %d\n", WEXITSTATUS(status));
+            } else if (WIFSIGNALED(status)) {
+                printf("Child process terminated by signal: %d\n", WTERMSIG(status));
+            }
+        }
+    }
 }
-
-char* get_current_dir_name() {
-  char* cwd = (char*)malloc(BUFLEN * sizeof(char));
-  if (cwd == NULL) {
-    perror("fish");
-    exit(EXIT_FAILURE);
-  }
-
-  if (getcwd(cwd, BUFLEN) == NULL) {
-    perror("fish");
-    free(cwd);
-    exit(EXIT_FAILURE);
-  }
-
-  return cwd;
-}
-
-
-void update_prompt() {
-  char* cwd = get_current_dir_name();
-  char* base = basename(cwd);
-  printf("fish %s> ", base);
-  free(cwd);
-}
-
-
 
 
 
@@ -89,13 +81,17 @@ int main() {
   if (sigaction(SIGINT, &sa, NULL) == -1) {
     perror("sigaction");
     return 1;
-  }
+  } 
+  // else {
+  //   buf[0] = '\n';
+  //   buf[1] = 0;
+  // }
 
 
   line_init(&li);
 
   for (;;) {
-    update_prompt();
+    update_prompt(BUFLEN);
     fgets(buf, BUFLEN, stdin);
 
     int err = line_parse(&li, buf);
@@ -130,9 +126,7 @@ int main() {
     //   fprintf(stderr, "\t\tFilename: '%s'\n", li.file_output);
     //   fprintf(stderr, "\t\tMode: %s\n", li.file_output_append ? "APPEND" : "TRUNC");
     // }
-
     // fprintf(stderr, "\tBackground: %s\n", YES_NO(li.background));
-
     /* do something with li */
 
 
@@ -160,12 +154,20 @@ int main() {
         redirect_output_append(li.file_output);
     }
 
+
+
+
     if (strcmp(li.cmds[0].args[0], "cd") == 0) {
       execute_command_intern_cd(li.cmds[0].args);
     } else if (strcmp(li.cmds[0].args[0], "exit") == 0) {
       execute_command_intern_exit();
+    } else if (li.background) {
+      int result = background_command(li.cmds[0].args[0], li.cmds[0].args, pid, li.background);
+      if (result != 0) {
+        return 1;
+      }
     } else {
-      int result = execute_command_extern(li.cmds[0].args[0], li.cmds[0].args, pid);
+      int result = execute_command_extern(li.cmds[0].args[0], li.cmds[0].args, pid, li.background);
       if (result != 0) {
         return 1;
       }
@@ -188,4 +190,3 @@ int main() {
 
   return 0;
 }
-

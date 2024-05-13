@@ -5,9 +5,12 @@ CFLAGS = -std=c99 -Wall -Wextra -g -I. -Iextern_cmd -Iintern_cmd
 LDFLAGS = -g -L.
 LDLIBS = -lcmdline
 
-all: libcmdline.so fish cmdline_test
+all: libcmdline.so libutil.so fish cmdline_test
 
-libcmdline.so: cmdline.o extern_cmd/extern_cmd.o intern_cmd/intern_cmd.o redirect_cmd/redirect_cmd.o
+libcmdline.so: cmdline.o extern_cmd/extern_cmd.o intern_cmd/intern_cmd.o redirect_cmd/redirect_cmd.o background_cmd/background_cmd.o util.o
+	$(CC) $(LDFLAGS) -shared -o $@ $^
+
+libutil.so: util.o 
 	$(CC) $(LDFLAGS) -shared -o $@ $^
 
 fish: fish.o libcmdline.so
@@ -28,10 +31,13 @@ intern_cmd/intern_cmd.o: intern_cmd/intern_cmd.c intern_cmd/intern_cmd.h
 redirect_cmd/redirect_cmd.o: redirect_cmd/redirect_cmd.c redirect_cmd/redirect_cmd.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
+background_cmd/background_cmd.o: background_cmd/background_cmd.c background_cmd/background_cmd.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
 clean:
 	rm -f *.o
 	rm -f extern_cmd/*.o
 	rm -f intern_cmd/*.o
 
 mrproper: clean
-	rm -f libcmdline.so fish cmdline_test
+	rm -f libcmdline.so libutil.so fish cmdline_test

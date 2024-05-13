@@ -4,8 +4,9 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <errno.h>
+#include "util.h"
 
-int execute_command_extern(char *cmd, char **args, pid_t pid) {
+int execute_command_extern(char *cmd, char **args, pid_t pid, int bg) {
     pid = fork();
     if (pid == -1) {
         perror("fork");
@@ -23,13 +24,7 @@ int execute_command_extern(char *cmd, char **args, pid_t pid) {
             perror("waitpid");
             return 1;
         }
-        if (WIFEXITED(status)) {
-            int exit_status = WEXITSTATUS(status);
-            fprintf(stderr, "        FG : %d exited, status=%d\n", pid, exit_status);
-        } else if (WIFSIGNALED(status)) {
-            int signal_number = WTERMSIG(status);
-            fprintf(stderr, "        FG : %d terminated by signal %d\n", pid, signal_number);
-        }
+        print_process_status(pid, status, bg);
     }
     return 0;
 }
