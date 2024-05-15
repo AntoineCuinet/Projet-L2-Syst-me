@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <libgen.h>
-
+#include "cmdline.h"
 
 
 int execute_command_intern_cd(char **args) {
@@ -27,7 +27,16 @@ int execute_command_intern_cd(char **args) {
 }
 
 
-int execute_command_intern_exit() {
+int execute_command_intern_exit(struct line *li, struct cmd *cmd) {
+    if (cmd->n_args > 2) {
+        fprintf(stderr, "exit: too many arguments\n");
+        return 1;
+    }
     printf("Exiting fish shell...\n");
-    exit(EXIT_SUCCESS);
+    int exit_status = EXIT_SUCCESS;
+    if (cmd->n_args == 2) {
+        exit_status = atoi(cmd->args[1]);
+    }
+    line_reset(li);
+    exit(exit_status);
 }

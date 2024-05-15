@@ -15,7 +15,7 @@ int execute_command_extern(char *cmd, char **args, pid_t pid, int bg) {
     if (pid == 0) {
         execvp(cmd, args);
         char error_message[256];
-        sprintf(error_message, "Recouvrement: %s", cmd);
+        snprintf(error_message, 256, "Recouvrement: %s", cmd);
         perror(error_message);
         return 1;
     } else {

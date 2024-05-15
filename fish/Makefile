@@ -1,8 +1,8 @@
 # CUINET Antoine - Makefile - fish
 
 CC = gcc
-CFLAGS = -std=c99 -Wall -Wextra -g -I. -Iextern_cmd -Iintern_cmd
-LDFLAGS = -g -L.
+CFLAGS = -std=c99 -Wall -Wextra -g -I. -Iextern_cmd -Iintern_cmd -fsanitize=address
+LDFLAGS = -g -L. -fsanitize=address
 LDLIBS = -lcmdline
 
 all: libcmdline.so libutil.so fish cmdline_test

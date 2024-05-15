@@ -42,6 +42,7 @@ volatile pid_t pid = -1;
 
 void signal_handler(int signal) {
   if (signal == SIGINT && pid != -1) {
+    // pid = 0 => ne rien faire / autres => tuer le processus dans un for
     // TODO: Mettre ici le code pour terminer les commandes lancées en avant-plan
     kill(pid, SIGTERM);
     // buf[0] = '\n';
@@ -139,40 +140,46 @@ int main() {
     saved_stderr = dup(STDERR_FILENO);
 
 
-    // Check if there is an input redirection
-    if (li.file_input) {
-      redirect_input(li.file_input);
-    }
-
-    // Checks if there is output redirection in TRUNC mode
-    if (li.file_output && !li.file_output_append) {
-        redirect_output_trunc(li.file_output);
-    }
-
-    // Checks if there is output redirection in APPEND mode 
-    if (li.file_output && li.file_output_append) {
-        redirect_output_append(li.file_output);
-    }
-
-
-
-
-    if (strcmp(li.cmds[0].args[0], "cd") == 0) {
-      execute_command_intern_cd(li.cmds[0].args);
-    } else if (strcmp(li.cmds[0].args[0], "exit") == 0) {
-      execute_command_intern_exit();
-    } else if (li.background) {
-      int result = background_command(li.cmds[0].args[0], li.cmds[0].args, pid, li.background);
-      if (result != 0) {
-        return 1;
+    if (li.n_cmds > 0) {
+      // Check if there is an input redirection
+      if (li.file_input) {
+        if (redirect_input(li.file_input) != 0) {
+          return 1;
+        }
       }
-    } else {
-      int result = execute_command_extern(li.cmds[0].args[0], li.cmds[0].args, pid, li.background);
-      if (result != 0) {
-        return 1;
+
+      // Checks if there is output redirection in TRUNC mode
+      if (li.file_output && !li.file_output_append) {
+        if (redirect_output_trunc(li.file_output) != 0) {
+          return 1;
+        }
+      }
+
+      // Checks if there is output redirection in APPEND mode 
+      if (li.file_output && li.file_output_append) {
+        if (redirect_output_append(li.file_output) != 0) {
+          return 1;
+        }
+      }
+
+
+
+      if (strcmp(li.cmds[0].args[0], "cd") == 0) {
+        execute_command_intern_cd(li.cmds[0].args);
+      } else if (strcmp(li.cmds[0].args[0], "exit") == 0) {
+        execute_command_intern_exit(&li, &li.cmds[0]);
+      } else if (li.background) {
+        int result = background_command(li.cmds[0].args[0], li.cmds[0].args, pid, li.background);
+        if (result != 0) {
+          return 1;
+        }
+      } else {
+        int result = execute_command_extern(li.cmds[0].args[0], li.cmds[0].args, pid, li.background);
+        if (result != 0) {
+          return 1;
+        }
       }
     }
-
     
 
     dup2(saved_stdin, STDIN_FILENO);

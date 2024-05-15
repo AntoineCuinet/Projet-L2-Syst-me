@@ -4,50 +4,53 @@
 #include <string.h>
 #include <fcntl.h>
 
-void redirect_input(char *filename) {
+int redirect_input(char *filename) {
     int fd = open(filename, O_RDONLY);
     if (fd == -1) {
         perror("open");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     if (dup2(fd, STDIN_FILENO) == -1) {
         perror("dup2");
         close(fd);
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     close(fd);
+    return 0;
 }
 
-void redirect_output_trunc(char *filename) {
+int redirect_output_trunc(char *filename) {
     int fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0666);
     if (fd == -1) {
         perror("open");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     if (dup2(fd, STDOUT_FILENO) == -1) {
         perror("dup2");
         close(fd);
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     close(fd);
+    return 0;
 }
 
-void redirect_output_append(char *filename) {
+int redirect_output_append(char *filename) {
     int fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0666);
     if (fd == -1) {
         perror("open");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     if (dup2(fd, STDOUT_FILENO) == -1) {
         perror("dup2");
         close(fd);
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     close(fd);
+    return 0;
 }

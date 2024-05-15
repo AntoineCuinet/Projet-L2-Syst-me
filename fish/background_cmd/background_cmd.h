@@ -3,7 +3,7 @@
 
 int is_input_redirected();
 
-void redirect_input_to_dev_null();
+int redirect_input_to_dev_null();
 
 int background_command(char *cmd, char **args, pid_t pid, int bg);
 

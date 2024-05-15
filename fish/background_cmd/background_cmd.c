@@ -13,19 +13,20 @@ int is_input_redirected() {
     return !isatty(STDIN_FILENO);
 }
 
-void redirect_input_to_dev_null() {
+int redirect_input_to_dev_null() {
     int dev_null_fd = open("/dev/null", O_RDONLY);
     if (dev_null_fd == -1) {
         perror("Error opening /dev/null");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     if (dup2(dev_null_fd, STDIN_FILENO) == -1) {
         perror("Error redirecting input to /dev/null");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     close(dev_null_fd);
+    return 0;
 }
 
 
@@ -40,7 +41,9 @@ int background_command(char *cmd, char **args, pid_t pid, int bg) {
 
         // Rediriger l'entrée standard vers /dev/null si nécessaire pour les processus en arrière-plan afin qu'ils ne bloquent pas le shell
         if (!is_input_redirected() && bg) {
-            redirect_input_to_dev_null();
+            if (redirect_input_to_dev_null() != 0) {
+                return 1;
+            }
         }
 
         execvp(cmd, args);
