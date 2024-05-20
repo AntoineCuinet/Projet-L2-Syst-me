@@ -17,7 +17,10 @@ int redirect_input(char *filename) {
         return 1;
     }
 
-    close(fd);
+    if (close(fd) == -1) {
+        perror("close");
+        return 1;
+    }
     return 0;
 }
 
@@ -34,7 +37,10 @@ int redirect_output_trunc(char *filename) {
         return 1;
     }
 
-    close(fd);
+    if (close(fd) == -1) {
+        perror("close");
+        return 1;
+    }
     return 0;
 }
 
@@ -51,6 +57,9 @@ int redirect_output_append(char *filename) {
         return 1;
     }
 
-    close(fd);
+    if (close(fd) == -1) {
+        perror("close");
+        return 1;
+    }
     return 0;
 }

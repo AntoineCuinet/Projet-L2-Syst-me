@@ -12,3 +12,8 @@ fish/
 └── intern_cmd/
     └── intern_cmd.c
     └── intern_cmd.h
+
+
+- commentaires en anglais
+- afficher message bg
+- handler pour ctr+C

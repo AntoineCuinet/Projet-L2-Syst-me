@@ -3,24 +3,56 @@
 #include <unistd.h>
 #include <string.h>
 #include <libgen.h>
+#include <errno.h>
+#include <pwd.h>
 #include "cmdline.h"
 
 
 int execute_command_intern_cd(char **args) {
-    char* target_dir;
-
+    char target_dir[1024];  // Buffer to store the target directory path
+    struct passwd *pw;
+    
     // Check if the cd command has an argument
-    if (args[1] == NULL || strcmp(args[1], "~") == 0) {
-        // If no argument or ~ is provided, change to the home directory
-        target_dir = getenv("HOME");
+    if (args[1] == NULL || strcmp(args[1], "~") == 0 || (args[1][0] == '~' && strlen(args[1]) == 1)) {
+        // If no argument, ~, or ~ with no username is provided, change to the home directory
+        snprintf(target_dir, sizeof(target_dir), "%s", getenv("HOME"));
+    } else if (args[1][0] == '~') {
+        // Handle ~user and ~user/path cases
+        char *username_end = strchr(args[1], '/');
+        if (username_end == NULL) {
+            username_end = args[1] + strlen(args[1]);
+        }
+
+        char username[1024];
+        strncpy(username, args[1] + 1, username_end - args[1] - 1);
+        username[username_end - args[1] - 1] = '\0';
+
+        pw = getpwnam(username);
+        if (pw == NULL) {
+            fprintf(stderr, "The user \"%s\" doesn't exist\n", username);
+            return 1;
+        }
+
+        if (*username_end == '\0') {
+            snprintf(target_dir, sizeof(target_dir), "%s", pw->pw_dir);
+        } else {
+            snprintf(target_dir, sizeof(target_dir), "%s%s", pw->pw_dir, username_end);
+        }
+
+        printf("Debug: dir = %s\n", target_dir);
     } else {
         // Otherwise, change to the specified directory
-        target_dir = args[1];
+        snprintf(target_dir, sizeof(target_dir), "%s", args[1]);
     }
 
     // Attempt to change the directory
     if (chdir(target_dir) != 0) {
-        perror("fish");
+        if (errno == EACCES) {
+            fprintf(stderr, "chdir : permission denied\n");
+        } else {
+            perror("fish");
+        }
+        return 1;
     }
 
     return 0;

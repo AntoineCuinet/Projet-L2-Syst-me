@@ -22,10 +22,14 @@ int redirect_input_to_dev_null() {
 
     if (dup2(dev_null_fd, STDIN_FILENO) == -1) {
         perror("Error redirecting input to /dev/null");
+        close(dev_null_fd);
         return 1;
     }
 
-    close(dev_null_fd);
+    if (close(dev_null_fd) == -1) {
+        perror("close");
+        return 1;
+    }
     return 0;
 }
 
