@@ -1,6 +1,10 @@
 #ifndef EXECUTE_COMMAND_EXTERN_H
 #define EXECUTE_COMMAND_EXTERN_H
 
+
+
+void remove_fg_process(pid_t pid_to_remove);
+
 /**
  * @brief Execute a command with arguments.
  * 

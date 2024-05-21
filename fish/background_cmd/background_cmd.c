@@ -6,10 +6,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include "util.h"
-// #include "process_management.h"
 
 volatile pid_t bg_processes[MAX_CMDS];
-volatile int bg_index = 0;
+volatile size_t bg_index = 0;
+
+
 
 int is_input_redirected() {
     // Vérifier si l'entrée standard est redirigée

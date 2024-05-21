@@ -6,6 +6,10 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include "cmdline.h"
+
+volatile pid_t bg_processes[MAX_CMDS];
+volatile size_t bg_index = 0;
 
 #define BUFLEN 512
 
@@ -31,6 +35,27 @@ void update_prompt() {
   char* base = basename(cwd);
   printf("fish %s> ", base);
   free(cwd);
+}
+
+
+void remove_element(volatile pid_t *array, int size, size_t index) {
+  for (int i = index; i < size - 1; ++i) {
+    array[i] = array[i+1];
+  }
+  array[size - 1] = 0;
+}
+
+
+void remove_terminated_bg_process() {
+  size_t i = 0;
+  while (i < MAX_CMDS) {
+    if (bg_processes[i] == -1) {
+      remove_element(bg_processes, MAX_CMDS, i);
+      bg_index--;
+    }
+    else
+      i++;
+  }
 }
 
 
@@ -61,12 +86,13 @@ void signal_handler(int signal) {
     // Nettoyer les processus zombies
     int status;
     int pid_wait;
-    while ((pid_wait = waitpid(-1, &status, WNOHANG)) > 0) {
-      if (WIFEXITED(status)) {
+
+    for (size_t i = 0; i < bg_index; ++i){
+      if (bg_processes[i] >= 1 && (pid_wait = waitpid(bg_processes[i], &status, WNOHANG)) > 0 ) {
         print_process_status(pid_wait, status, 1);
-      } else if (WIFSIGNALED(status)) {
-        print_process_status(pid_wait, status, 1);
+        bg_processes[i] = -1;
       }
     }
+    remove_terminated_bg_process();
   }
 }
