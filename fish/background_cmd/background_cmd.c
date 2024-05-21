@@ -6,7 +6,10 @@
 #include <errno.h>
 #include <fcntl.h>
 #include "util.h"
+// #include "process_management.h"
 
+volatile pid_t bg_processes[MAX_CMDS];
+volatile int bg_index = 0;
 
 int is_input_redirected() {
     // Vérifier si l'entrée standard est redirigée
@@ -55,15 +58,8 @@ int background_command(char *cmd, char **args, pid_t pid, int bg) {
         sprintf(error_message, "Recouvrement: %s", cmd);
         perror(error_message);
         return 1;
-    } else { // Processus parent
-        int status;
-        if (! bg) {
-            if (waitpid(pid, &status, 0) == -1) {
-                perror("waitpid");
-                return 1;
-            }
-            print_process_status(pid, status, bg);
-        }
     }
+    bg_processes[bg_index++] = pid;
+
     return 0;
 }

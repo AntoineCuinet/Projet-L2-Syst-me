@@ -37,34 +37,6 @@
 
 #define YES_NO(i) ((i) ? "Y" : "N")
 
-volatile pid_t pid = -1;
-
-
-void signal_handler(int signal) {
-  if (signal == SIGINT && pid != -1) {
-    // pid = 0 => ne rien faire / autres => tuer le processus dans un for
-    // TODO: Mettre ici le code pour terminer les commandes lancées en avant-plan
-    kill(pid, SIGTERM);
-    // buf[0] = '\n';
-    // buf[1] = '0';
-  } 
-  //else {
-    // ignorer le signal
-    //signal(signal, SIG_IGN);
-  //}
-
-  if (signal == SIGCHLD) {
-        // Nettoyer les processus zombies
-        int status;
-        while (waitpid(-1, &status, WNOHANG) > 0) {
-            if (WIFEXITED(status)) {
-                printf("Child process exited with status: %d\n", WEXITSTATUS(status));
-            } else if (WIFSIGNALED(status)) {
-                printf("Child process terminated by signal: %d\n", WTERMSIG(status));
-            }
-        }
-    }
-}
 
 
 
@@ -77,22 +49,27 @@ int main() {
   // Install signal handler
   struct sigaction sa;
   sigemptyset(&sa.sa_mask);
-  sa.sa_handler = signal_handler;
-  sa.sa_flags = 0;
+  sa.sa_handler = SIG_IGN;
+  sa.sa_flags = SA_RESTART;
   if (sigaction(SIGINT, &sa, NULL) == -1) {
     perror("sigaction");
     return 1;
-  } 
-  // else {
-  //   buf[0] = '\n';
-  //   buf[1] = 0;
-  // }
+  }
 
+
+  struct sigaction sigchld_action;
+  sigemptyset(&sigchld_action.sa_mask);
+  sigchld_action.sa_handler = signal_handler;
+  sigchld_action.sa_flags = SA_RESTART;
+  if (sigaction(SIGCHLD, &sigchld_action, NULL) == -1) {
+    perror("sigaction");
+    return 1;
+  }
 
   line_init(&li);
 
   for (;;) {
-    update_prompt(BUFLEN);
+    update_prompt();
     fgets(buf, BUFLEN, stdin);
 
     int err = line_parse(&li, buf);
@@ -131,13 +108,17 @@ int main() {
     /* do something with li */
 
 
-    int saved_stdin;
-    int saved_stdout;
-    int saved_stderr;
+    // crée une copie du descripteur de fichier (utiliser pour les redirections de la question 5)
+    int saved_stdin = dup(STDIN_FILENO);
+    int saved_stdout = dup(STDOUT_FILENO);
+    int saved_stderr = dup(STDERR_FILENO);
 
-    saved_stdin = dup(STDIN_FILENO);
-    saved_stdout = dup(STDOUT_FILENO);
-    saved_stderr = dup(STDERR_FILENO);
+    if (saved_stdin == -1 || saved_stdout == -1 || saved_stderr == -1) {
+        perror("dup");
+        exit(EXIT_FAILURE);
+    }
+
+    
 
 
     if (li.n_cmds > 0) {
@@ -169,11 +150,13 @@ int main() {
       } else if (strcmp(li.cmds[0].args[0], "exit") == 0) {
         execute_command_intern_exit(&li, &li.cmds[0]);
       } else if (li.background) {
+        pid_t pid = -1;
         int result = background_command(li.cmds[0].args[0], li.cmds[0].args, pid, li.background);
         if (result != 0) {
           return 1;
         }
       } else {
+        pid_t pid = -1;
         int result = execute_command_extern(li.cmds[0].args[0], li.cmds[0].args, pid, li.background);
         if (result != 0) {
           return 1;
@@ -182,15 +165,19 @@ int main() {
     }
     
 
-    dup2(saved_stdin, STDIN_FILENO);
-    dup2(saved_stdout, STDOUT_FILENO);
-    dup2(saved_stderr, STDERR_FILENO);
 
-    // Fermeture des descripteurs dupliqués
+    
+    // Restaurer les descripteurs de fichiers standard
+    if (dup2(saved_stdin, STDIN_FILENO) == -1 ||
+      dup2(saved_stdout, STDOUT_FILENO) == -1 ||
+      dup2(saved_stderr, STDERR_FILENO) == -1) {
+      perror("dup2");
+      exit(EXIT_FAILURE);
+    }
+    // Fermer les descripteurs sauvegardés
     close(saved_stdin);
     close(saved_stdout);
     close(saved_stderr);
-
 
     line_reset(&li);
   }

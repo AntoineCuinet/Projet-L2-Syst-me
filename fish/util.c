@@ -5,8 +5,11 @@
 #include <libgen.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 
-char* get_current_dir_name(int BUFLEN) {
+#define BUFLEN 512
+
+char* get_current_dir_name() {
   char* cwd = (char*)malloc(BUFLEN * sizeof(char));
   if (cwd == NULL) {
     perror("fish");
@@ -23,8 +26,8 @@ char* get_current_dir_name(int BUFLEN) {
 }
 
 
-void update_prompt(int BUFLEN) {
-  char* cwd = get_current_dir_name(BUFLEN);
+void update_prompt() {
+  char* cwd = get_current_dir_name();
   char* base = basename(cwd);
   printf("fish %s> ", base);
   free(cwd);
@@ -32,19 +35,38 @@ void update_prompt(int BUFLEN) {
 
 
 void print_process_status(pid_t pid, int status, int is_background) {
+  char *buf = calloc(BUFLEN, sizeof(char));
   if (WIFEXITED(status)) {
     int exit_status = WEXITSTATUS(status);
     if (is_background) {
-      fprintf(stderr, "        BG : %d exited, status=%d\n", pid, exit_status);
+      snprintf(buf, BUFLEN, "        BG : %d exited, status=%d\n", pid, exit_status);
     } else {
-      fprintf(stderr, "        FG : %d exited, status=%d\n", pid, exit_status);
+      snprintf(buf, BUFLEN, "        FG : %d exited, status=%d\n", pid, exit_status);
     }
   } else if (WIFSIGNALED(status)) {
     int signal_number = WTERMSIG(status);
     if (is_background) {
-      fprintf(stderr, "        BG : %d terminated by signal %d\n", pid, signal_number);
+      snprintf(buf, BUFLEN, "        BG : %d terminated by signal %d\n", pid, signal_number);
     } else {
-      fprintf(stderr, "        FG : %d terminated by signal %d\n", pid, signal_number);
+      snprintf(buf, BUFLEN, "        FG : %d terminated by signal %d\n", pid, signal_number);
+    }
+  }
+  write(STDERR_FILENO, buf, strlen(buf)*sizeof(char));
+  free(buf);
+}
+
+
+void signal_handler(int signal) {
+  if (signal == SIGCHLD) {
+    // Nettoyer les processus zombies
+    int status;
+    int pid_wait;
+    while ((pid_wait = waitpid(-1, &status, WNOHANG)) > 0) {
+      if (WIFEXITED(status)) {
+        print_process_status(pid_wait, status, 1);
+      } else if (WIFSIGNALED(status)) {
+        print_process_status(pid_wait, status, 1);
+      }
     }
   }
 }

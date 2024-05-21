@@ -7,14 +7,14 @@ LDLIBS = -lcmdline
 
 all: libcmdline.so libutil.so fish cmdline_test
 
-libcmdline.so: cmdline.o extern_cmd/extern_cmd.o intern_cmd/intern_cmd.o redirect_cmd/redirect_cmd.o background_cmd/background_cmd.o util.o
+libcmdline.so: cmdline.o
 	$(CC) $(LDFLAGS) -shared -o $@ $^
 
 libutil.so: util.o 
 	$(CC) $(LDFLAGS) -shared -o $@ $^
 
-fish: fish.o libcmdline.so
-	$(CC) $(LDFLAGS) $< -o $@ $(LDLIBS)
+fish: fish.o extern_cmd/extern_cmd.o intern_cmd/intern_cmd.o redirect_cmd/redirect_cmd.o background_cmd/background_cmd.o libcmdline.so libutil.so
+	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS)
 
 cmdline_test: cmdline_test.o libcmdline.so
 	$(CC) $(LDFLAGS) $< -o $@ $(LDLIBS)
