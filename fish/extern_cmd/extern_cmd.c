@@ -56,13 +56,6 @@ int execute_command_extern(char *cmd, char **args, pid_t pid, int bg) {
                 remove_fg_process(res);
             }
         }
-
-        // int status;
-        // if (waitpid(pid, &status, 0) == -1) {
-        //     perror("waitpid");
-        //     return 1;
-        // }
-        // print_process_status(pid, status, bg);
     }
     return 0;
 }

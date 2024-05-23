@@ -11,7 +11,6 @@ volatile pid_t bg_processes[MAX_CMDS];
 volatile size_t bg_index = 0;
 
 
-
 int is_input_redirected() {
     // Vérifier si l'entrée standard est redirigée
     return !isatty(STDIN_FILENO);

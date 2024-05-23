@@ -15,4 +15,9 @@ fish/
 
 
 - afficher message bg
-- commentaires en anglais
+
+
+doc à faire:
+- pipe
+- extern 
+- bg
