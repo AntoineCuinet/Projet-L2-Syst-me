@@ -75,7 +75,7 @@ int main() {
       line_reset(&li);
       continue;
     }
-    
+
 
     // Creating a copy of the file descriptor (useful for redirects from question 5)
     int saved_stdin = dup(STDIN_FILENO);
@@ -112,24 +112,26 @@ int main() {
           execute_command_intern_cd(li.cmds[0].args);
         } else if (strcmp(li.cmds[0].args[0], "exit") == 0) {
           execute_command_intern_exit(&li, &li.cmds[0]);
-        } else // execute_line_with_pipes(&li)
-        if (li.background) {
-          pid_t pid = -1;
-          int result = background_command(li.cmds[0].args[0], li.cmds[0].args, pid, li.background);
-          if (result != 0) {
-            return 1;
-          }
         } else {
-          pid_t pid = -1;
-          int result = execute_command_extern(li.cmds[0].args[0], li.cmds[0].args, pid, li.background);
+          // pid_t pid = -1;
+          int result = execute_command(li.cmds[0].args[0], li.cmds[0].args, li.background);
           if (result != 0) {
             return 1;
           }
         }
-      } else {
-        // Multiple commands with pipes
-        execute_line_with_pipes(&li);
       }
+      // else {
+      //   // Multiple commands with pipes
+      //   char arr_cmds[li.n_cmds];
+      //   for (size_t i = 0; i < li.n_cmds; i++) {
+      //     arr_cmds[i] = li.cmds[i].args[0];
+      //   }
+
+      //   int ret = execute_line_with_pipes(arr_cmds, li.n_cmds);
+      //   if (ret != 0) {
+      //     return 1;
+      //   }
+      // }
     }
     
 

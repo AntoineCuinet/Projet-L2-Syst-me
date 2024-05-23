@@ -20,6 +20,12 @@
 int execute_command_intern_cd(char **args) {
     char target_dir[1024];  // Buffer to store the target directory path
     struct passwd *pw;
+
+    // Check if the cd command has too many arguments
+    if (args[2] != NULL) {
+        fprintf(stderr, "cd: too many arguments\n");
+        return 1;
+    }
     
     // Check if the cd command has an argument
     if (args[1] == NULL || strcmp(args[1], "~") == 0 || (args[1][0] == '~' && strlen(args[1]) == 1)) {
@@ -79,6 +85,7 @@ int execute_command_intern_cd(char **args) {
  * @return int This function does not return; it exits the program.
  */
 int execute_command_intern_exit(struct line *li, struct cmd *cmd) {
+    // Check if the exit command has too many arguments
     if (cmd->n_args > 2) {
         fprintf(stderr, "exit: too many arguments\n");
         return 1;
