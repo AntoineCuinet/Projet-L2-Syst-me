@@ -107,11 +107,30 @@ void remove_fg_process(pid_t pid_to_remove) {
   }
 }
 
+/**
+ * @brief Checks if the standard input (stdin) is redirected.
+ * 
+ * This function checks whether the standard input is coming from a terminal
+ * (tty) or if it has been redirected from a file or another source. It uses
+ * the `isatty` function to determine this.
+ * 
+ * @return int Returns 0 if stdin is coming from a terminal (not redirected),
+ *             and returns a non-zero value if stdin is redirected.
+ */
 int is_input_redirected() {
-    // Vérifier si l'entrée standard est redirigée
+    // Check if standard input is redirected
     return !isatty(STDIN_FILENO);
 }
 
+/**
+ * @brief Redirects the standard input (stdin) to /dev/null.
+ * 
+ * This function opens /dev/null for reading and redirects the standard input
+ * to read from /dev/null instead. This is useful for background processes that
+ * should not read from the terminal.
+ * 
+ * @return int Returns 0 on success, or 1 if an error occurs.
+ */
 int redirect_input_to_dev_null() {
     int dev_null_fd = open("/dev/null", O_RDONLY);
     if (dev_null_fd == -1) {
@@ -209,16 +228,16 @@ int execute_command(char *cmd, char **args, int bg) {
     return 1;
   }
 
-  if (pid == 0) { // Processus enfant
+  if (pid == 0) { // Child processes
     if (bg) {
-      // Rediriger l'entrée standard vers /dev/null pour les processus en arrière-plan
+      // Redirect standard input to /dev/null for background processes
       if (!is_input_redirected()) {
         if (redirect_input_to_dev_null() != 0) {
           return 1;
         }
       }
     } else {
-      // Réinitialiser le gestionnaire de SIGINT à la valeur par défaut pour les commandes en avant-plan
+      // Reset SIGINT handler to default for foreground commands
       struct sigaction default_sigint;
       sigemptyset(&default_sigint.sa_mask);
       default_sigint.sa_flags = SA_RESTART;
@@ -229,6 +248,7 @@ int execute_command(char *cmd, char **args, int bg) {
       }
     }
     
+    // Execute the command
     execvp(cmd, args);
     char error_message[256];
     snprintf(error_message, 256, "Exec error: %s", cmd);
@@ -236,9 +256,13 @@ int execute_command(char *cmd, char **args, int bg) {
     return 1;
   } else {
     if (bg) {
+      // Add background process to the list
       bg_processes[bg_index++] = pid;
     } else {
+      // Add foreground process to the list
       fg_processes[fg_index++] = pid;
+
+      // Wait for the foreground process to complete
       while (fg_index > 0) {
         int status;
         pid_t res = wait(&status);

@@ -1,15 +1,6 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-// #include <sys/types.h>
-// #include "cmdline.h"
-
-// extern volatile pid_t bg_processes[MAX_CMDS];
-// extern volatile size_t bg_index;
-// extern volatile pid_t fg_processes[MAX_CMDS];
-// extern volatile size_t fg_index;
-
-
 /**
  * @brief Get the current working directory.
  *
@@ -59,12 +50,28 @@ void remove_terminated_bg_process();
  */
 void remove_fg_process(pid_t pid_to_remove);
 
-
+/**
+ * @brief Checks if the standard input (stdin) is redirected.
+ * 
+ * This function checks whether the standard input is coming from a terminal
+ * (tty) or if it has been redirected from a file or another source. It uses
+ * the `isatty` function to determine this.
+ * 
+ * @return int Returns 0 if stdin is coming from a terminal (not redirected),
+ *             and returns a non-zero value if stdin is redirected.
+ */
 int is_input_redirected();
+
+/**
+ * @brief Redirects the standard input (stdin) to /dev/null.
+ * 
+ * This function opens /dev/null for reading and redirects the standard input
+ * to read from /dev/null instead. This is useful for background processes that
+ * should not read from the terminal.
+ * 
+ * @return int Returns 0 on success, or 1 if an error occurs.
+ */
 int redirect_input_to_dev_null();
-
-
-
 
 /**
  * @brief Print the status of a process.
@@ -103,12 +110,6 @@ void signal_handler(int signal);
  * @param bg A flag indicating if the command should run in the background (non-zero) or foreground (zero).
  *
  * @return 0 on success, 1 on error with error messages printed to stderr.
- *
- * Example usage:
- * @code
- * char *args[] = {"ls", "-l", NULL};
- * execute_command("ls", args, 0); // Run 'ls -l' in the foreground.
- * @endcode
  */
 int execute_command(char *cmd, char **args, int bg);
 

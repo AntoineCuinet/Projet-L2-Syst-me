@@ -22,17 +22,11 @@ cmdline_test: cmdline_test.o libcmdline.so
 %.o: %.c
 	$(CC) $(CFLAGS) -fPIC -c $< -o $@
 
-# extern_cmd/extern_cmd.o: extern_cmd/extern_cmd.c extern_cmd/extern_cmd.h
-# 	$(CC) $(CFLAGS) -c $< -o $@
-
 intern_cmd/intern_cmd.o: intern_cmd/intern_cmd.c intern_cmd/intern_cmd.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 redirect_cmd/redirect_cmd.o: redirect_cmd/redirect_cmd.c redirect_cmd/redirect_cmd.h
 	$(CC) $(CFLAGS) -c $< -o $@
-
-# background_cmd/background_cmd.o: background_cmd/background_cmd.c background_cmd/background_cmd.h
-# 	$(CC) $(CFLAGS) -c $< -o $@
 
 pipe_cmd/pipe_cmd.o: pipe_cmd/pipe_cmd.c pipe_cmd/pipe_cmd.h
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -40,10 +34,8 @@ pipe_cmd/pipe_cmd.o: pipe_cmd/pipe_cmd.c pipe_cmd/pipe_cmd.h
 
 clean:
 	rm -f *.o
-	rm -f extern_cmd/*.o
 	rm -f intern_cmd/*.o
 	rm -f redirect_cmd/*.o
-	rm -f background_cmd/*.o
 	rm -f pipe_cmd/*.o
 
 mrproper: clean

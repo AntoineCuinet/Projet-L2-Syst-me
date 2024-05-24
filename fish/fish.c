@@ -28,10 +28,8 @@
 
 #include "cmdline.h"
 #include "util.h"
-#include "extern_cmd/extern_cmd.h"
 #include "intern_cmd/intern_cmd.h"
 #include "redirect_cmd/redirect_cmd.h"
-#include "background_cmd/background_cmd.h"
 #include "pipe_cmd/pipe_cmd.h"
 
 #define BUFLEN 512
