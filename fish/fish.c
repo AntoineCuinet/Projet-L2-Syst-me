@@ -133,8 +133,6 @@ int main() {
     }
     
 
-
-    
     // Restore and close standard file descriptors
     if (dup2(saved_stdin, STDIN_FILENO) == -1 ||
       dup2(saved_stdout, STDOUT_FILENO) == -1 ||

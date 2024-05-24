@@ -50,6 +50,7 @@ void update_prompt() {
   char* cwd = get_current_dir_name();
   char* base = basename(cwd);
   printf("fish %s> ", base);
+  fflush(stdout);  // Force the output buffer to be flushed
   free(cwd);
 }
 
@@ -165,13 +166,16 @@ void print_process_status(pid_t pid, int status, int is_background) {
   char *buf = calloc(BUFLEN, sizeof(char));
   if (WIFEXITED(status)) {
     int exit_status = WEXITSTATUS(status);
-    snprintf(buf, BUFLEN, "    %s: %d exited, status=%d\n", is_background ? "BG" : "FG", pid, exit_status);
+    snprintf(buf, BUFLEN, "%s: %d exited, status=%d\n", is_background ? "\n\tBG" : "\tFG", pid, exit_status);
   } else if (WIFSIGNALED(status)) {
     int signal_number = WTERMSIG(status);
-    snprintf(buf, BUFLEN, "    %s: %d terminated by signal %d\n", is_background ? "BG" : "FG", pid, signal_number);
+    snprintf(buf, BUFLEN, "%s: %d terminated by signal %d\n", is_background ? "\n\tBG" : "\tFG", pid, signal_number);
   }
   write(STDERR_FILENO, buf, strlen(buf)*sizeof(char));
   free(buf);
+  if (is_background) {
+    update_prompt();
+  }
 }
 
 /**
