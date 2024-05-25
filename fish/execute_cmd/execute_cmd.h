@@ -34,18 +34,19 @@ void remove_fg_process(pid_t pid_to_remove);
 void signal_handler(int signal);
 
 /**
- * @brief Execute a command either in the foreground or background.
+ * @brief Execute a command either in the foreground or background, with or without pipes.
  *
- * This function handles the execution of an external command. It forks a child process
- * to run the command. If the command is to be run in the background, it ensures that
- * the input is redirected appropriately and does not block the shell. For foreground
- * commands, it waits for the command to complete and manages the foreground process
- * list.
+ * This function handles the execution of internal commands like `cd` and `exit`, as well as 
+ * external commands, both with and without pipes. It supports running commands in the 
+ * background or foreground, and handles input redirection for background processes.
+ * If the command line contains multiple commands separated by pipes, it delegates to
+ * functions designed to handle one or multiple pipes.
  *
  * @param cmd The command to execute (e.g., "ls", "grep", etc.).
  * @param args The arguments for the command, including the command itself as args[0].
  * @param bg A flag indicating if the command should run in the background (non-zero) or foreground (zero).
- * @param li A pointer to the line structure.
+ * @param li A pointer to the `struct line` containing the parsed command line, including commands, 
+ *           arguments, input/output file redirections, and background execution flag.
  *
  * @return 0 on success, 1 on error with error messages printed to stderr.
  */

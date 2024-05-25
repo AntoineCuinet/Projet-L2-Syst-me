@@ -9,6 +9,12 @@
 #include <fcntl.h>
 #include "cmdline.h"
 
+
+volatile pid_t bg_processes[MAX_CMDS];
+volatile size_t bg_index = 0;
+volatile pid_t fg_processes[MAX_CMDS];
+volatile size_t fg_index = 0;
+
 #define BUFLEN 512
 
 

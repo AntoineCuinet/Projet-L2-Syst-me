@@ -1,6 +1,13 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+
+extern volatile pid_t bg_processes[MAX_CMDS];
+extern volatile size_t bg_index;
+extern volatile pid_t fg_processes[MAX_CMDS];
+extern volatile size_t fg_index;
+
+
 /**
  * @brief Get the current working directory.
  *

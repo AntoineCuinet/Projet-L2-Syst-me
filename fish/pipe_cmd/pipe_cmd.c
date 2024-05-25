@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 
 #include "cmdline.h"
 #include "util.h"
+#include "execute_cmd/execute_cmd.h"
 
 /**
  * @brief Execute a command line containing exactly one pipe.
@@ -19,7 +21,7 @@
  *
  * @return 0 on success, 1 on error with error messages printed to stderr.
  */
-int execute_line_with_one_pipes(struct line *li) {
+int execute_line_with_one_pipe(struct line *li) {
     if (li->n_cmds != 2) {
         fprintf(stderr, "This function supports exactly one pipe between two commands.\n");
         return 1;
@@ -42,7 +44,26 @@ int execute_line_with_one_pipes(struct line *li) {
     }
 
     if (pids[0] == 0) { // In the first child process
+        if (li->background) {
+            // Redirect standard input to /dev/null for background processes
+            if (!is_input_redirected()) {
+                if (redirect_input_to_dev_null() != 0) {
+                    return 1;
+                }
+            }
+        } else {
+            // Reset SIGINT handler to default for foreground commands
+            struct sigaction default_sigint;
+            sigemptyset(&default_sigint.sa_mask);
+            default_sigint.sa_flags = SA_RESTART;
+            default_sigint.sa_handler = SIG_DFL;
+            if (sigaction(SIGINT, &default_sigint, NULL) == -1) {
+                perror("sigaction");
+                return 1;
+            }
+        }
         
+
         // Redirect stdout to the pipe
         if (dup2(pipefd[1], STDOUT_FILENO) == -1) {
             perror("dup2");
@@ -67,11 +88,29 @@ int execute_line_with_one_pipes(struct line *li) {
     }
 
     if (pids[1] == 0) { // In the second child process
+        if (li->background) {
+            // Redirect standard input to /dev/null for background processes
+            if (!is_input_redirected()) {
+                if (redirect_input_to_dev_null() != 0) {
+                    return 1;
+                }
+            }
+        } else {
+            // Reset SIGINT handler to default for foreground commands
+            struct sigaction default_sigint;
+            sigemptyset(&default_sigint.sa_mask);
+            default_sigint.sa_flags = SA_RESTART;
+            default_sigint.sa_handler = SIG_DFL;
+            if (sigaction(SIGINT, &default_sigint, NULL) == -1) {
+                perror("sigaction");
+                return 1;
+            }
+        }
 
         // Redirect stdin to the pipe
         if (dup2(pipefd[0], STDIN_FILENO) == -1) {
             perror("dup2");
-            exit(EXIT_FAILURE);
+            return 1;
         }
 
         // Close unused pipe ends
@@ -81,7 +120,7 @@ int execute_line_with_one_pipes(struct line *li) {
         // Execute the second command
         execvp(li->cmds[1].args[0], li->cmds[1].args);
         perror("execvp");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     // Parent process
@@ -92,13 +131,25 @@ int execute_line_with_one_pipes(struct line *li) {
 
     // Wait for both child processes to finish and print their status
     for (int i = 0; i < 2; i++) {
-        int status;
-        pid_t res = waitpid(pids[i], &status, 0);
-        if (res == -1) {
-            perror("waitpid");
-            return 1;
+        if (li->background) {
+            // Add background process to the list
+            bg_processes[bg_index++] = pids[i];
+        } else {
+            // Add foreground process to the list
+            fg_processes[fg_index++] = pids[i];
+            // Wait for the foreground process to complete
+            while (fg_index > 0) {
+                int status;
+                pid_t res = wait(&status);
+                if (res == -1) {
+                    perror("wait");
+                    return 1;
+                } else {
+                    print_process_status(res, status, li->background);
+                    remove_fg_process(res);
+                }
+            }
         }
-        print_process_status(res, status, li->background);
     }
 
     return 0;
@@ -138,12 +189,30 @@ int execute_line_with_pipes(struct line *li) {
         }
 
         if (pids[i] == 0) { // Child processes
+            if (li->background) {
+                // Redirect standard input to /dev/null for background processes
+                if (!is_input_redirected()) {
+                    if (redirect_input_to_dev_null() != 0) {
+                        return 1;
+                    }
+                }
+            } else {
+                // Reset SIGINT handler to default for foreground commands
+                struct sigaction default_sigint;
+                sigemptyset(&default_sigint.sa_mask);
+                default_sigint.sa_flags = SA_RESTART;
+                default_sigint.sa_handler = SIG_DFL;
+                if (sigaction(SIGINT, &default_sigint, NULL) == -1) {
+                    perror("sigaction");
+                    return 1;
+                }
+            }
 
             // Redirect input
             if (i > 0) {
                 if (dup2(pipefd[(i - 1) * 2], STDIN_FILENO) == -1) {
                     perror("dup2");
-                    exit(EXIT_FAILURE);
+                    return 1;
                 }
             }
 
@@ -151,7 +220,7 @@ int execute_line_with_pipes(struct line *li) {
             if (i < li->n_cmds - 1) {
                 if (dup2(pipefd[i * 2 + 1], STDOUT_FILENO) == -1) {
                     perror("dup2");
-                    exit(EXIT_FAILURE);
+                    return 1;
                 }
             }
 
@@ -163,7 +232,7 @@ int execute_line_with_pipes(struct line *li) {
             // Execute the command
             execvp(li->cmds[i].args[0], li->cmds[i].args);
             perror("execvp");
-            exit(EXIT_FAILURE);
+            return 1;
         }
     }
 
@@ -174,8 +243,25 @@ int execute_line_with_pipes(struct line *li) {
 
     // Wait for all child processes
     for (size_t i = 0; i < li->n_cmds; i++) {
-        int status;
-        waitpid(pids[i], &status, 0);
+        if (li->background) {
+            // Add background process to the list
+            bg_processes[bg_index++] = pids[i];
+        } else {
+            // Add foreground process to the list
+            fg_processes[fg_index++] = pids[i];
+            // Wait for the foreground process to complete
+            while (fg_index > 0) {
+                int status;
+                pid_t res = wait(&status);
+                if (res == -1) {
+                    perror("wait");
+                    return 1;
+                } else {
+                    print_process_status(res, status, li->background);
+                    remove_fg_process(res);
+                }
+            }
+        }
     }
 
     return 0;

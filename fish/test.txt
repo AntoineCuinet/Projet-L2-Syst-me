@@ -6,4 +6,5 @@ fish fish> azmkelifjvcbn
 azmkelifjvcbn
 azmkelifjvcbn
 allocated
-fish fish> 
+fish fish>        8
+       4

@@ -12,11 +12,6 @@
 #include "intern_cmd/intern_cmd.h"
 #include "pipe_cmd/pipe_cmd.h"
 
-volatile pid_t bg_processes[MAX_CMDS];
-volatile size_t bg_index = 0;
-volatile pid_t fg_processes[MAX_CMDS];
-volatile size_t fg_index = 0;
-
 
 /**
  * @brief Remove terminated background processes from the array.
@@ -81,18 +76,19 @@ void signal_handler(int signal) {
 }
 
 /**
- * @brief Execute a command either in the foreground or background.
+ * @brief Execute a command either in the foreground or background, with or without pipes.
  *
- * This function handles the execution of an external command. It forks a child process
- * to run the command. If the command is to be run in the background, it ensures that
- * the input is redirected appropriately and does not block the shell. For foreground
- * commands, it waits for the command to complete and manages the foreground process
- * list.
+ * This function handles the execution of internal commands like `cd` and `exit`, as well as 
+ * external commands, both with and without pipes. It supports running commands in the 
+ * background or foreground, and handles input redirection for background processes.
+ * If the command line contains multiple commands separated by pipes, it delegates to
+ * functions designed to handle one or multiple pipes.
  *
  * @param cmd The command to execute (e.g., "ls", "grep", etc.).
  * @param args The arguments for the command, including the command itself as args[0].
  * @param bg A flag indicating if the command should run in the background (non-zero) or foreground (zero).
- * @param li The line struct containing the parsed command line.
+ * @param li A pointer to the `struct line` containing the parsed command line, including commands, 
+ *           arguments, input/output file redirections, and background execution flag.
  *
  * @return 0 on success, 1 on error with error messages printed to stderr.
  *
@@ -119,9 +115,14 @@ int execute_command(char *cmd, char **args, int bg, struct line *li) {
 
     // Handle pipes
     if (li->n_cmds > 1) {
-        return execute_line_with_one_pipes(li);
+        /* function for only one pipe */
+        // return execute_line_with_one_pipe(li);
 
-    // Execute external command
+        /* function for multiple pipes */
+        return execute_line_with_pipes(li);
+
+
+    // Execute external command without pipes
     } else {
 
         pid_t pid = fork();

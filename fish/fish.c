@@ -28,7 +28,6 @@
 
 #include "cmdline.h"
 #include "util.h"
-// #include "intern_cmd/intern_cmd.h"
 #include "redirect_cmd/redirect_cmd.h"
 #include "pipe_cmd/pipe_cmd.h"
 #include "execute_cmd/execute_cmd.h"
