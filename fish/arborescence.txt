@@ -1,23 +1,26 @@
 fish/
 │
-├── fish.c
+├── arborescence.txt
 ├── cmdline.c
 ├── cmdline.h
 ├── cmdline_test.c
+├── fish.c
 ├── Makefile
+├── util.c
+│── util.h
 │
-└── extern_cmd/
-    └── extern_cmd.c
-    └── extern_cmd.h
-└── intern_cmd/
-    └── intern_cmd.c
-    └── intern_cmd.h
-
-
-- afficher message bg
-
-
-doc à faire:
-- pipe
-- extern 
-- bg
+├── execute_cmd
+│   ├── execute_cmd.c
+│   └── execute_cmd.h
+│
+├── intern_cmd
+│   ├── intern_cmd.c
+│   └── intern_cmd.h
+│
+├── pipe_cmd
+│   ├── pipe_cmd.c
+│   └── pipe_cmd.h
+│
+└── redirect_cmd
+    ├── redirect_cmd.c
+    └── redirect_cmd.h

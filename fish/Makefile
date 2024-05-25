@@ -39,6 +39,7 @@ clean:
 	rm -f *.o
 	rm -f intern_cmd/*.o
 	rm -f redirect_cmd/*.o
+	rm -f execute_cmd/*.o
 	rm -f pipe_cmd/*.o
 
 mrproper: clean
