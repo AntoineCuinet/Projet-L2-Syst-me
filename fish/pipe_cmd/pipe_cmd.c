@@ -71,8 +71,10 @@ int execute_line_with_one_pipe(struct line *li) {
         }
 
         // Close unused pipe ends
-        close(pipefd[0]);
-        close(pipefd[1]);
+        if (close(pipefd[0]) == -1 || close(pipefd[1]) == -1) {
+            perror("close");
+            return 1;
+        }
 
         // Execute the first command
         execvp(li->cmds[0].args[0], li->cmds[0].args);
@@ -114,8 +116,10 @@ int execute_line_with_one_pipe(struct line *li) {
         }
 
         // Close unused pipe ends
-        close(pipefd[0]);
-        close(pipefd[1]);
+        if (close(pipefd[0]) == -1 || close(pipefd[1]) == -1) {
+            perror("close");
+            return 1;
+        }
 
         // Execute the second command
         execvp(li->cmds[1].args[0], li->cmds[1].args);
@@ -126,8 +130,10 @@ int execute_line_with_one_pipe(struct line *li) {
     // Parent process
 
     // Close unused pipe ends
-    close(pipefd[0]);
-    close(pipefd[1]);
+    if (close(pipefd[0]) == -1 || close(pipefd[1]) == -1) {
+        perror("close");
+        return 1;
+    }
 
     // Wait for both child processes to finish and print their status
     for (int i = 0; i < 2; i++) {
@@ -226,7 +232,10 @@ int execute_line_with_pipes(struct line *li) {
 
             // Close all pipe descriptors in child
             for (size_t j = 0; j < 2 * (li->n_cmds - 1); j++) {
-                close(pipefd[j]);
+                if (close(pipefd[j]) == -1) {
+                    perror("close");
+                    return 1;
+                }
             }
 
             // Execute the command
@@ -238,7 +247,10 @@ int execute_line_with_pipes(struct line *li) {
 
     // Close all pipe descriptors in parent
     for (size_t i = 0; i < 2 * (li->n_cmds - 1); i++) {
-        close(pipefd[i]);
+        if (close(pipefd[i]) == -1) {
+            perror("close");
+            return 1;
+        }
     }
 
     // Wait for all child processes

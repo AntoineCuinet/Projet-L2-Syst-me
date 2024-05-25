@@ -111,15 +111,14 @@ int main() {
     
 
     // Restore and close standard file descriptors
-    if (dup2(saved_stdin, STDIN_FILENO) == -1 ||
-      dup2(saved_stdout, STDOUT_FILENO) == -1 ||
-      dup2(saved_stderr, STDERR_FILENO) == -1) {
+    if (dup2(saved_stdin, STDIN_FILENO) == -1 || dup2(saved_stdout, STDOUT_FILENO) == -1 || dup2(saved_stderr, STDERR_FILENO) == -1) {
       perror("dup2");
-      exit(EXIT_FAILURE);
+      return 1;
     }
-    close(saved_stdin);
-    close(saved_stdout);
-    close(saved_stderr);
+    if (close(saved_stdin) == -1 || close(saved_stdout) == -1 || close(saved_stderr) == -1) {
+      perror("close");
+      return 1;
+    }
 
     line_reset(&li);
   }
