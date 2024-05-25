@@ -10,10 +10,10 @@ all: libcmdline.so libutil.so fish cmdline_test
 libcmdline.so: cmdline.o
 	$(CC) $(LDFLAGS) -shared -o $@ $^
 
-libutil.so: util.o 
+libutil.so: util.o
 	$(CC) $(LDFLAGS) -shared -o $@ $^
 
-fish: fish.o intern_cmd/intern_cmd.o redirect_cmd/redirect_cmd.o pipe_cmd/pipe_cmd.o libcmdline.so libutil.so
+fish: fish.o intern_cmd/intern_cmd.o redirect_cmd/redirect_cmd.o execute_cmd/execute_cmd.o pipe_cmd/pipe_cmd.o libcmdline.so libutil.so
 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS)
 
 cmdline_test: cmdline_test.o libcmdline.so
@@ -26,6 +26,9 @@ intern_cmd/intern_cmd.o: intern_cmd/intern_cmd.c intern_cmd/intern_cmd.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 redirect_cmd/redirect_cmd.o: redirect_cmd/redirect_cmd.c redirect_cmd/redirect_cmd.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+execute_cmd/execute_cmd.o: execute_cmd/execute_cmd.c execute_cmd/execute_cmd.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 pipe_cmd/pipe_cmd.o: pipe_cmd/pipe_cmd.c pipe_cmd/pipe_cmd.h
