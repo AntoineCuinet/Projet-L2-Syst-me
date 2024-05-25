@@ -11,10 +11,17 @@
 /*********************************************************************/
 /***                          CONCLUSION                           ***/
 /***                                                               ***/
+/*** All questions on the subject have been answered (except bonus ***/
+/*** question 9).                                                  ***/
+/*** All questions addressed comply with the requested             ***/
+/*** instructions.                                                 ***/
 /***                                                               ***/
+/*** I didn't test my program on Valgrind because I'm on a Mac     ***/
+/*** and I don't have access to Linux (having taken the pipes      ***/
+/*** during the weekend and the university is closed).             ***/
 /***                                                               ***/
-/***                                                               ***/
-/***                                                               ***/
+/*** I created a new dynamic library and several compilation       ***/
+/*** units to factorize the code.                                  ***/
 /*********************************************************************/
 
 
